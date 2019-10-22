@@ -25,7 +25,7 @@ public class InMemoryClipRepository implements ClipRepository {
 
     @Override
     public Flux<Clip> getClips() {
-        return Flux.fromIterable(clips).delayElements(Duration.ofSeconds(2));
+        return Flux.fromIterable(clips).delayElements(Duration.ofSeconds(1));
     }
 
     @Override
