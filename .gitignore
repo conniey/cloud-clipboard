@@ -29,3 +29,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# We don't want to check in this file
+application.production.properties
