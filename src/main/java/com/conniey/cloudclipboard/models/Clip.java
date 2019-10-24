@@ -11,6 +11,8 @@ public class Clip {
     private String contents;
     @JsonProperty
     private OffsetDateTime created;
+    @JsonProperty
+    private String url;
 
     public String getId() {
         return id;
@@ -36,6 +38,15 @@ public class Clip {
 
     public Clip setCreated(OffsetDateTime created) {
         this.created = created;
+        return this;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public Clip setUrl(String url) {
+        this.url = url;
         return this;
     }
 }
