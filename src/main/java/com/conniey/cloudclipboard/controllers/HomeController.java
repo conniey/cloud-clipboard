@@ -1,14 +1,18 @@
 package com.conniey.cloudclipboard.controllers;
 
+import com.conniey.cloudclipboard.models.Clip;
 import com.conniey.cloudclipboard.repository.ClipRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.thymeleaf.spring5.context.webflux.IReactiveDataDriverContextVariable;
 import org.thymeleaf.spring5.context.webflux.ReactiveDataDriverContextVariable;
+import reactor.core.publisher.Mono;
 
 @Controller
 public class HomeController {
@@ -40,5 +44,10 @@ public class HomeController {
         model.addAttribute("clip", reactiveDataDriverContextVariable);
 
         return "clip";
+    }
+
+    @PostMapping("/")
+    public Mono<Clip> upload(@RequestBody Clip clip) {
+        return repository.addClip(clip);
     }
 }

@@ -8,4 +8,6 @@ public interface ClipRepository {
     Flux<Clip> getClips();
 
     Mono<Clip> getClip(String id);
+
+    Mono<Clip> addClip(Clip clip);
 }

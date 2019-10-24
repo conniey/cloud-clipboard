@@ -11,7 +11,9 @@ import reactor.core.publisher.Mono;
 @Profile("production")
 public class AzureStorageRepository implements ClipRepository {
     @Autowired
-    public AzureStorageRepository()
+    public AzureStorageRepository() {
+
+    }
 
     @Override
     public Flux<Clip> getClips() {
@@ -20,6 +22,11 @@ public class AzureStorageRepository implements ClipRepository {
 
     @Override
     public Mono<Clip> getClip(String id) {
+        return null;
+    }
+
+    @Override
+    public Mono<Clip> addClip(Clip clip) {
         return null;
     }
 }
