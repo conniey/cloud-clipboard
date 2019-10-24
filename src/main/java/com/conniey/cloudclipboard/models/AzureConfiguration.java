@@ -4,9 +4,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
-@Configuration
-@PropertySource("classpath:app.properties")
-@ConfigurationProperties(prefix = "aad")
+@ConfigurationProperties("aad")
 public class AzureConfiguration {
     private String clientId;
     private String clientSecret;
