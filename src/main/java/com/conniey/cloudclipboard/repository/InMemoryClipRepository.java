@@ -35,7 +35,7 @@ public class InMemoryClipRepository implements ClipRepository {
 
     @Override
     public Flux<Clip> getClips() {
-        return Flux.fromIterable(clips).delayElements(Duration.ofSeconds(1));
+        return Flux.fromIterable(clips).delayElements(Duration.ofMillis(300));
     }
 
     @Override
@@ -51,6 +51,7 @@ public class InMemoryClipRepository implements ClipRepository {
 
         return Mono.fromRunnable(() -> {
             final int id = counter.getAndIncrement();
+            clip.setCreated(OffsetDateTime.now());
             clip.setId(String.valueOf(id));
             clips.add(clip);
         });

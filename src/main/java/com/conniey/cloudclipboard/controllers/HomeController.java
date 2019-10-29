@@ -6,16 +6,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.thymeleaf.spring5.context.webflux.IReactiveDataDriverContextVariable;
 import org.thymeleaf.spring5.context.webflux.ReactiveDataDriverContextVariable;
 import reactor.core.publisher.Mono;
 
 @Controller
 public class HomeController {
+    private static final String CLIPS_SET = "clips";
+    private static final String CLIP_SAVE = "clipSave";
+    private static final String IS_SAVE_SUCCESS = "isSaveSuccess";
+
     private final ClipRepository repository;
 
     @Autowired
@@ -23,31 +25,31 @@ public class HomeController {
         this.repository = repository;
     }
 
-    @RequestMapping("/")
+    @GetMapping("/")
     public String index(Model model) {
         IReactiveDataDriverContextVariable reactiveDataDrivenMode =
                 new ReactiveDataDriverContextVariable(repository.getClips(), 1);
 
-        // classic, wait repository loaded all and display it.
-        //model.addAttribute("movies", movieRepository.findAll());
-
-        model.addAttribute("clips", reactiveDataDrivenMode);
+        model.addAttribute(CLIPS_SET, reactiveDataDrivenMode);
+        model.addAttribute(CLIP_SAVE, new Clip());
 
         return "index";
     }
 
-    @GetMapping("/clips")
-    public String getClip(@RequestParam(name="id")String id, Model model) {
-        IReactiveDataDriverContextVariable reactiveDataDriverContextVariable =
-                new ReactiveDataDriverContextVariable(repository.getClip(id), 1);
+    @PostMapping("/clips")
+    public Mono<String> saveClip(@ModelAttribute Clip clip, Model model) {
+        return repository.addClip(clip).map(added -> {
+            model.addAttribute(IS_SAVE_SUCCESS, true);
+            return added;
+        }).onErrorContinue((error, ob) -> {
+            model.addAttribute(IS_SAVE_SUCCESS, false);
+        }).then(Mono.fromCallable(() -> {
+            IReactiveDataDriverContextVariable reactiveDataDrivenMode =
+                    new ReactiveDataDriverContextVariable(repository.getClips(), 1);
 
-        model.addAttribute("clip", reactiveDataDriverContextVariable);
-
-        return "clip";
-    }
-
-    @PostMapping("/")
-    public Mono<Clip> upload(@RequestBody Clip clip) {
-        return repository.addClip(clip);
+            model.addAttribute(CLIPS_SET, reactiveDataDrivenMode);
+            model.addAttribute(CLIP_SAVE, new Clip());
+            return "index";
+        }));
     }
 }
