@@ -49,11 +49,13 @@ public class InMemoryClipRepository implements ClipRepository {
             return Mono.error(new IllegalArgumentException("'clip' cannot be null."));
         }
 
-        return Mono.fromRunnable(() -> {
+        return Mono.fromCallable(() -> {
             final int id = counter.getAndIncrement();
             clip.setCreated(OffsetDateTime.now());
             clip.setId(String.valueOf(id));
             clips.add(clip);
+
+            return clip;
         });
     }
 }

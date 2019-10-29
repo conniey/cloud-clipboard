@@ -1,6 +1,7 @@
 package com.conniey.cloudclipboard.controllers;
 
 import com.conniey.cloudclipboard.models.Clip;
+import com.conniey.cloudclipboard.models.ClipSaveStatus;
 import com.conniey.cloudclipboard.repository.ClipRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -16,7 +17,7 @@ import reactor.core.publisher.Mono;
 public class HomeController {
     private static final String CLIPS_SET = "clips";
     private static final String CLIP_SAVE = "clipSave";
-    private static final String IS_SAVE_SUCCESS = "isSaveSuccess";
+    private static final String SAVE_STATUS = "saveStatus";
 
     private final ClipRepository repository;
 
@@ -32,6 +33,7 @@ public class HomeController {
 
         model.addAttribute(CLIPS_SET, reactiveDataDrivenMode);
         model.addAttribute(CLIP_SAVE, new Clip());
+        model.addAttribute(SAVE_STATUS, new ClipSaveStatus());
 
         return "index";
     }
@@ -39,13 +41,17 @@ public class HomeController {
     @PostMapping("/clips")
     public Mono<String> saveClip(@ModelAttribute Clip clip, Model model) {
         return repository.addClip(clip).map(added -> {
-            model.addAttribute(IS_SAVE_SUCCESS, true);
+            model.addAttribute(SAVE_STATUS, new ClipSaveStatus(true));
             return added;
         }).onErrorContinue((error, ob) -> {
-            model.addAttribute(IS_SAVE_SUCCESS, false);
+            model.addAttribute(SAVE_STATUS, new ClipSaveStatus(false));
         }).then(Mono.fromCallable(() -> {
             IReactiveDataDriverContextVariable reactiveDataDrivenMode =
                     new ReactiveDataDriverContextVariable(repository.getClips(), 1);
+
+            if (!model.containsAttribute(SAVE_STATUS)) {
+                model.addAttribute(SAVE_STATUS, new ClipSaveStatus(true));
+            }
 
             model.addAttribute(CLIPS_SET, reactiveDataDrivenMode);
             model.addAttribute(CLIP_SAVE, new Clip());

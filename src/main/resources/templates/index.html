@@ -22,10 +22,17 @@
 </head>
 <body>
 
-<div class="jumbotron jumbotron-fluid">
-    <h1 class="display-4">Cloud Clipboard</h1>
-    <!--    <a class="btn btn-primary btn-lg" href="#" role="button">Learn more</a>-->
-</div>
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand" href="/">Cloud Clipboard</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+        <div class="navbar-nav">
+            <a class="nav-item nav-link active" href="/">Home<span class="sr-only">(current)</span></a>
+        </div>
+    </div>
+</nav>
 
 <div class="container">
     <div class="row">
@@ -46,12 +53,11 @@
             </tbody>
         </table>
     </div>
-    <div class="row"></div>
     <div class="row">
         <div class="col">
             <form action="#" th:action="@{/clips}" th:object="${clipSave}" method="post">
                 <div class="form-group">
-                    <label for="clip-content-save">Clip Contents:</label>
+                    <label for="clip-content-save">Add Clip:</label>
                     <textarea class="form-control" id="clip-content-save" rows="3" required th:field="*{contents}"
                               placeholder="Enter contents..."></textarea>
                 </div>
@@ -60,5 +66,14 @@
             </form>
         </div>
         <div class="col-4"></div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <p th:class="${#bools.isTrue(saveStatus.isVisible())}? 'visible' : 'invisible'">
+                <span th:class="${#bools.isTrue(saveStatus.wasSaved())}? 'text-success' : 'text-danger'">
+                    [[${saveStatus.getStatus()}]]
+                </span>
+            </p>
+        </div>
     </div>
 </div>
