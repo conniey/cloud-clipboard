@@ -18,6 +18,3 @@ continuation_indent_size = 4
 # From https://maven.apache.org/developers/conventions/code.html
 [*.java]
 continuation_indent_size = 8
-
-[*.md]
-trim_trailing_whitespace = false
