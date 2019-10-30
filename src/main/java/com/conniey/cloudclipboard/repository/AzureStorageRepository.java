@@ -10,6 +10,7 @@ import com.microsoft.azure.storage.ResultSegment;
 import com.microsoft.azure.storage.StorageCredentials;
 import com.microsoft.azure.storage.StorageCredentialsAccountAndKey;
 import com.microsoft.azure.storage.StorageException;
+import com.microsoft.azure.storage.StorageUri;
 import com.microsoft.azure.storage.blob.CloudBlobClient;
 import com.microsoft.azure.storage.blob.CloudBlobContainer;
 import com.microsoft.azure.storage.blob.CloudBlockBlob;
@@ -22,7 +23,9 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.io.IOException;
+import java.net.URI;
 import java.net.URISyntaxException;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Repository
@@ -99,7 +102,9 @@ public class AzureStorageRepository implements ClipRepository {
                 throw Exceptions.propagate(e);
             }
 
-            clip.setId(id);
+            clip.setId(id)
+                    .setCreated(OffsetDateTime.now());
+
             try {
                 final String serialized = objectMapper.writeValueAsString(clip);
                 reference.uploadText(serialized);
@@ -114,7 +119,7 @@ public class AzureStorageRepository implements ClipRepository {
             throws URISyntaxException, StorageException {
         final StorageCredentials credentials = new StorageCredentialsAccountAndKey(
                 configuration.getAccountName(), configuration.getAccessKey());
-        final CloudStorageAccount storageAccount = new CloudStorageAccount(credentials);
+        final CloudStorageAccount storageAccount = new CloudStorageAccount(credentials, true);
         final CloudBlobClient cloudBlobClient = storageAccount.createCloudBlobClient();
         return cloudBlobClient.getContainerReference(configuration.getContainerName());
     }
@@ -143,14 +148,27 @@ public class AzureStorageRepository implements ClipRepository {
                             new RuntimeException("Could not fetch more blobs with continuation: " + marker, e));
                 }
 
-                segment.getResults().forEach(blob -> {
-                    final Clip clip = new Clip().setId(blob.getUri().toString());
-                    sink.next(clip);
-                });
+                for (ListBlobItem blob : segment.getResults()) {
+                    final String path = blob.getUri().getPath();
+                    final String[] split = path.split("/");
+                    final String blobName = split[split.length - 1];
+
+                    try {
+                        final CloudBlockBlob blockBlobReference = containerClient.getBlockBlobReference(blobName);
+                        final String contents = blockBlobReference.downloadText();
+                        final Clip clip = objectMapper.readValue(contents, Clip.class);
+                        sink.next(clip);
+
+                    } catch (URISyntaxException | StorageException | IOException e) {
+                        System.err.println("Error fetching blob: " + e);
+                    }
+                }
 
                 continuation = segment.getContinuationToken();
                 hasMoreResults = segment.getHasMoreResults();
             } while (hasMoreResults);
+
+            sink.complete();
         });
     }
 }
