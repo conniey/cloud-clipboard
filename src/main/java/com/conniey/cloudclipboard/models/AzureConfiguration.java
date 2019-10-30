@@ -1,8 +1,6 @@
 package com.conniey.cloudclipboard.models;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
 
 @ConfigurationProperties("aad")
 public class AzureConfiguration {

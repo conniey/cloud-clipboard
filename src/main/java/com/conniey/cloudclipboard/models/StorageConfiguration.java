@@ -12,11 +12,13 @@ public class StorageConfiguration {
     private final String accountName;
     private final String accessKey;
     private final String containerName;
+    private final String endpoint;
 
-    public StorageConfiguration(String accountName, String accessKey, String containerName) {
+    public StorageConfiguration(String accountName, String accessKey, String containerName, String endpoint) {
         this.accountName = accountName;
         this.accessKey = accessKey;
         this.containerName = containerName;
+        this.endpoint = endpoint;
     }
 
     public String getAccessKey() {
@@ -29,5 +31,9 @@ public class StorageConfiguration {
 
     public String getContainerName() {
         return containerName;
+    }
+
+    public String getEndpoint() {
+        return endpoint;
     }
 }
