@@ -29,6 +29,7 @@ public class AzureStorageRepository implements ClipRepository {
     public AzureStorageRepository(AzureConfiguration azureConfiguration, StorageConfiguration configuration,
             ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
+
         final TokenCredential clientSecretCredential = new ClientSecretCredentialBuilder()
                 .clientId(azureConfiguration.getClientId())
                 .clientSecret(azureConfiguration.getClientSecret())
