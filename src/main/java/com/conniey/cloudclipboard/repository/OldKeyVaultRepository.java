@@ -27,7 +27,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 @Repository
-@Profile("oldsdks")
+@Profile("oldsdk")
 public class OldKeyVaultRepository implements SecretRepository {
     private final KeyVaultClient keyVaultClient;
     private final String keyVaultUrl;

@@ -27,7 +27,7 @@ import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Repository
-@Profile("oldsdks")
+@Profile("oldsdk")
 public class OldAzureStorageRepository implements ClipRepository {
     private final CloudBlobContainer containerClient;
     private final ObjectMapper objectMapper;
@@ -46,13 +46,6 @@ public class OldAzureStorageRepository implements ClipRepository {
     @Override
     public Flux<Clip> getClips() {
         return Flux.create(sink -> {
-            try {
-                containerClient.createIfNotExists();
-            } catch (StorageException ex) {
-                sink.error(ex);
-                return;
-            }
-
             ResultContinuation continuation = null;
             boolean hasMoreResults;
             do {

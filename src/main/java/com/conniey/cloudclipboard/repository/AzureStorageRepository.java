@@ -10,6 +10,7 @@ import com.conniey.cloudclipboard.models.StorageConfiguration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.util.ByteBufferBackedInputStream;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 import reactor.core.Exceptions;
 import reactor.core.publisher.Flux;
@@ -19,6 +20,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 
 @Repository
+@Profile("production")
 public class AzureStorageRepository implements ClipRepository {
     private final ObjectMapper objectMapper;
     private final BlobContainerAsyncClient containerClient;
@@ -43,7 +45,8 @@ public class AzureStorageRepository implements ClipRepository {
     @Override
     public Flux<Clip> getClips() {
         return containerClient.listBlobsFlat().flatMap(blob -> containerClient
-                .getBlobAsyncClient(blob.getName()).download()
+                .getBlobAsyncClient(blob.getName())
+                .download()
                 .reduce((first, second) -> {
                     first.rewind();
                     second.rewind();
