@@ -34,7 +34,7 @@ public class OldKeyVaultRepository implements SecretRepository {
 
     @Autowired
     public OldKeyVaultRepository(AzureConfiguration azureConfiguration, KeyVaultConfiguration configuration) {
-        this.keyVaultUrl = configuration.getUrl();
+        this.keyVaultUrl = configuration.getEndpoint();
 
         final ClientSecret clientSecret = new ClientSecret(azureConfiguration.getClientSecret());
         final String authority = "https://login.microsoftonline.com/" + azureConfiguration.getTenantId();
