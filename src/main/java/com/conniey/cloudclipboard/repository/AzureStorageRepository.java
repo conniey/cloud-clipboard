@@ -1,7 +1,7 @@
 package com.conniey.cloudclipboard.repository;
 
-import com.azure.core.credentials.TokenCredential;
-import com.azure.identity.credential.ClientSecretCredentialBuilder;
+import com.azure.core.credential.TokenCredential;
+import com.azure.identity.ClientSecretCredentialBuilder;
 import com.azure.storage.blob.BlobContainerAsyncClient;
 import com.azure.storage.blob.BlobServiceClientBuilder;
 import com.conniey.cloudclipboard.models.AzureConfiguration;
@@ -45,7 +45,7 @@ public class AzureStorageRepository implements ClipRepository {
 
     @Override
     public Flux<Clip> getClips() {
-        return containerClient.listBlobsFlat().flatMap(blob -> containerClient
+        return containerClient.listBlobs().flatMap(blob -> containerClient
                 .getBlobAsyncClient(blob.getName())
                 .download()
                 .reduce((first, second) -> {

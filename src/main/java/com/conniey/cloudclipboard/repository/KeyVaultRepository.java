@@ -1,7 +1,7 @@
 package com.conniey.cloudclipboard.repository;
 
-import com.azure.core.credentials.TokenCredential;
-import com.azure.identity.credential.ClientSecretCredentialBuilder;
+import com.azure.core.credential.TokenCredential;
+import com.azure.identity.ClientSecretCredentialBuilder;
 import com.azure.security.keyvault.secrets.SecretAsyncClient;
 import com.azure.security.keyvault.secrets.SecretClientBuilder;
 import com.conniey.cloudclipboard.models.AzureConfiguration;
@@ -28,13 +28,13 @@ public class KeyVaultRepository implements SecretRepository {
 
         secretClient = new SecretClientBuilder()
                 .credential(clientSecretCredential)
-                .endpoint(configuration.getEndpoint())
+                .vaultUrl(configuration.getEndpoint())
                 .buildAsyncClient();
     }
 
     @Override
     public Flux<Secret> listSecrets() {
-        return secretClient.listSecrets()
+        return secretClient.listPropertiesOfSecrets()
                 .flatMap(secret -> secretClient.getSecret(secret.getName()))
                 .map(secret -> new Secret(secret.getId(), secret.getName(), secret.getValue(),
                         secret.getProperties().getContentType()));
