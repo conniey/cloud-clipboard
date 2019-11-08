@@ -28,7 +28,7 @@ public class KeyVaultRepository implements SecretRepository {
 
         secretClient = new SecretClientBuilder()
                 .credential(clientSecretCredential)
-                .endpoint(configuration.getUrl())
+                .endpoint(configuration.getEndpoint())
                 .buildAsyncClient();
     }
 

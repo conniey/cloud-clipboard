@@ -9,13 +9,18 @@ import org.springframework.boot.context.properties.ConstructorBinding;
 @ConstructorBinding
 @ConfigurationProperties("keyvault")
 public class KeyVaultConfiguration {
-    private String url;
+    private String endpoint;
 
-    public KeyVaultConfiguration(String url) {
-        this.url = url;
+    public KeyVaultConfiguration(String endpoint) {
+        this.endpoint = endpoint;
     }
 
-    public String getUrl() {
-        return url;
+    /**
+     * Gets the endpoint for the Key Vault.
+     *
+     * @return The endpoint for the Key Vault.
+     */
+    public String getEndpoint() {
+        return endpoint;
     }
 }
