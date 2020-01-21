@@ -9,8 +9,7 @@ import org.mockito.MockitoAnnotations;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.CALLS_REAL_METHODS;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -50,7 +49,7 @@ class MockitoStubbing {
 
         final UsersCollection collection = new UsersCollection(repository);
 
-        when(collection.getUsersById(any())).then(invocation -> {
+        when(repository.get(anyList())).then(invocation -> {
             List<String> userIds = invocation.getArgument(0);
             List<User> matchingUsers = new ArrayList<>();
             userIds.forEach(e -> {
