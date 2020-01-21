@@ -31,6 +31,8 @@ import reactor.core.publisher.Mono;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Controller
@@ -179,11 +181,12 @@ public class HomeController {
         }
 
         final String id = UUID.randomUUID().toString();
-        clip.setId(id);
 
-        byte[] contents;
+        clip.setId(id).setCreated(OffsetDateTime.now());
+
+        final String serialized;
         try {
-            contents = objectMapper.writeValueAsBytes(clip);
+            serialized = objectMapper.writeValueAsString(clip);
         } catch (JsonProcessingException e) {
             return Mono.error(new RuntimeException("Unable to serialize clip.", e));
         }
@@ -192,7 +195,7 @@ public class HomeController {
         final ParallelTransferOptions options = new ParallelTransferOptions(1096, 4, receiver);
 
         return containerClient.getBlobAsyncClient(id)
-                .upload(Flux.just(ByteBuffer.wrap(contents)), options)
+                .upload(Flux.just(StandardCharsets.UTF_8.encode(serialized)), options)
                 .thenReturn(clip);
     }
 
