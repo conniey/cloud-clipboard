@@ -6,12 +6,15 @@ import com.azure.security.keyvault.secrets.SecretAsyncClient;
 import com.azure.security.keyvault.secrets.SecretClientBuilder;
 import com.azure.storage.blob.BlobContainerAsyncClient;
 import com.azure.storage.blob.BlobServiceClientBuilder;
+import com.azure.storage.blob.ProgressReceiver;
+import com.azure.storage.blob.models.ParallelTransferOptions;
 import com.conniey.cloudclipboard.models.AzureConfiguration;
 import com.conniey.cloudclipboard.models.Clip;
 import com.conniey.cloudclipboard.models.ClipSaveStatus;
 import com.conniey.cloudclipboard.models.KeyVaultConfiguration;
 import com.conniey.cloudclipboard.models.Secret;
 import com.conniey.cloudclipboard.models.StorageConfiguration;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.util.ByteBufferBackedInputStream;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +31,7 @@ import reactor.core.publisher.Mono;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.UUID;
 
 @Controller
 public class HomeController {
@@ -170,7 +174,26 @@ public class HomeController {
     }
 
     private Mono<Clip> addClip(Clip clip) {
-        return Mono.empty();
+        if (clip == null) {
+            return Mono.error(new IllegalArgumentException("'clip' is required."));
+        }
+
+        final String id = UUID.randomUUID().toString();
+        clip.setId(id);
+
+        byte[] contents;
+        try {
+            contents = objectMapper.writeValueAsBytes(clip);
+        } catch (JsonProcessingException e) {
+            return Mono.error(new RuntimeException("Unable to serialize clip.", e));
+        }
+
+        final ProgressReceiver receiver = progress -> System.out.printf("[%s] Progress: %s%n", id, progress);
+        final ParallelTransferOptions options = new ParallelTransferOptions(1096, 4, receiver);
+
+        return containerClient.getBlobAsyncClient(id)
+                .upload(Flux.just(ByteBuffer.wrap(contents)), options)
+                .thenReturn(clip);
     }
 
     private Flux<Secret> listSecrets() {
