@@ -67,23 +67,18 @@ public class HomeController {
 
     @PostMapping("/clips")
     public Mono<String> saveClip(@ModelAttribute Clip clip, Model model) {
-        return repository.addClip(clip).map(added -> {
-            model.addAttribute(SAVE_STATUS, new ClipSaveStatus(true));
-            return added;
-        }).onErrorContinue((error, ob) -> {
-            model.addAttribute(SAVE_STATUS, new ClipSaveStatus(false));
-        }).then(Mono.fromCallable(() -> {
-            IReactiveDataDriverContextVariable reactorModel =
-                    new ReactiveDataDriverContextVariable(repository.getClips(), 1);
+        return repository.addClip(clip)
+                .map(e -> new ClipSaveStatus(true))
+                .onErrorResume(error -> Mono.just(new ClipSaveStatus(false)))
+                .map(status -> {
+                    IReactiveDataDriverContextVariable reactorModel =
+                            new ReactiveDataDriverContextVariable(repository.getClips(), 1);
 
-            if (!model.containsAttribute(SAVE_STATUS)) {
-                model.addAttribute(SAVE_STATUS, new ClipSaveStatus(true));
-            }
-
-            model.addAttribute(CLIPS_SET, reactorModel);
-            model.addAttribute(CLIP_SAVE, new Clip());
-            return "index";
-        }));
+                    model.addAttribute(SAVE_STATUS, status);
+                    model.addAttribute(CLIPS_SET, reactorModel);
+                    model.addAttribute(CLIP_SAVE, new Clip());
+                    return "index";
+                });
     }
 
     Flux<Clip> getClips() {

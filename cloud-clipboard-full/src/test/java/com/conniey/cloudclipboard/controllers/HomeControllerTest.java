@@ -1,6 +1,7 @@
 package com.conniey.cloudclipboard.controllers;
 
 import com.conniey.cloudclipboard.models.Clip;
+import com.conniey.cloudclipboard.models.ClipSaveStatus;
 import com.conniey.cloudclipboard.models.Secret;
 import com.conniey.cloudclipboard.repository.ClipRepository;
 import com.conniey.cloudclipboard.repository.SecretRepository;
@@ -18,14 +19,13 @@ import org.thymeleaf.spring5.context.webflux.IReactiveDataDriverContextVariable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+import reactor.test.publisher.TestPublisher;
 
-import java.util.List;
-
+import static com.conniey.cloudclipboard.controllers.HomeController.SAVE_STATUS;
 import static com.conniey.cloudclipboard.controllers.HomeController.SECRETS_LIST;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -51,11 +51,6 @@ class HomeControllerTest {
         Mockito.framework().clearInlineMocks();
     }
 
-    @Test
-    void getClips() {
-
-    }
-
     /**
      * Verifies that we can get secrets.
      */
@@ -64,11 +59,14 @@ class HomeControllerTest {
         // Arrange
         final Secret secret1 = new Secret("my-secret-key", "my-secret-value");
         final Secret secret2 = new Secret("my-secret-key-2", "my-secret-value-2");
+        final TestPublisher<Secret> publisher = TestPublisher.create();
+        publisher.emit(secret1, secret2);
+
         final ReactiveAdapterRegistry reactiveAdapterRegistry = new ReactiveAdapterRegistry();
         final ArgumentCaptor<IReactiveDataDriverContextVariable> secretsArgumentCaptor =
                 ArgumentCaptor.forClass(IReactiveDataDriverContextVariable.class);
 
-        when(secretRepository.listSecrets()).thenReturn(Flux.just(secret1, secret2));
+        when(secretRepository.listSecrets()).thenReturn(publisher.flux());
 
         // Act
         final String templateName = controller.getSecrets(model);
@@ -90,7 +88,7 @@ class HomeControllerTest {
      * Verifies that we can add clip.
      */
     @Test
-    void addClip() {
+    void canSaveClip() {
         // Arrange
         final String id = "added-clip-id";
         final String contents = "Test-contents";
@@ -110,6 +108,29 @@ class HomeControllerTest {
                 .verifyComplete();
 
         // Assert
+        verify(clipRepository).addClip(argThat(arg -> contents.equals(arg.getContents())));
+    }
+
+    @Test
+    void handlesSaveClipError() {
+        // Arrange
+        final String id = "added-clip-id";
+        final String contents = "Test-contents";
+        final String templateName = "index";
+        final Clip addedClip = new Clip().setContents(contents);
+        final TestPublisher<Clip> publisher = TestPublisher.create();
+        publisher.error(new IllegalArgumentException("TEST: An error occurred when saving clip"));
+
+        when(clipRepository.getClips()).thenReturn(Flux.empty());
+        when(clipRepository.addClip(any())).thenReturn(publisher.mono());
+
+        // Act
+        StepVerifier.create(controller.saveClip(addedClip, model))
+                .expectNext(templateName)
+                .verifyComplete();
+
+        // Assert
+        verify(model).addAttribute(eq(SAVE_STATUS), argThat(a -> (a instanceof ClipSaveStatus) && !((ClipSaveStatus)a).wasSaved()));
         verify(clipRepository).addClip(argThat(arg -> contents.equals(arg.getContents())));
     }
 }
