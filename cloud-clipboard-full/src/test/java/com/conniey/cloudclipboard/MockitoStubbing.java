@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -74,5 +75,25 @@ class MockitoStubbing {
 
         // Assert
         Assertions.assertEquals(3, actual.size());
+    }
+
+    @Test
+    void testAbstractClasses() {
+        // Arrange
+        final AnAbstractClass mock = mock(AnAbstractClass.class);
+
+        // Act
+        final String actual = mock.someComplexAbstractLogic();
+
+        // Assert
+        Assertions.assertNotNull(actual);
+    }
+
+    abstract class AnAbstractClass {
+        String someComplexAbstractLogic() {
+            return "phew";
+        }
+
+        abstract Integer getValue();
     }
 }

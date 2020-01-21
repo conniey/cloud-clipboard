@@ -42,8 +42,7 @@ class HomeControllerTest {
     @BeforeEach
     void setup() {
         MockitoAnnotations.initMocks(this);
-        controller = new HomeController(clipRepository,
-                secretRepository);
+        controller = new HomeController(clipRepository, secretRepository);
     }
 
     @AfterEach
@@ -59,14 +58,10 @@ class HomeControllerTest {
         // Arrange
         final Secret secret1 = new Secret("my-secret-key", "my-secret-value");
         final Secret secret2 = new Secret("my-secret-key-2", "my-secret-value-2");
-        final TestPublisher<Secret> publisher = TestPublisher.create();
-        publisher.emit(secret1, secret2);
 
         final ReactiveAdapterRegistry reactiveAdapterRegistry = new ReactiveAdapterRegistry();
         final ArgumentCaptor<IReactiveDataDriverContextVariable> secretsArgumentCaptor =
                 ArgumentCaptor.forClass(IReactiveDataDriverContextVariable.class);
-
-        when(secretRepository.listSecrets()).thenReturn(publisher.flux());
 
         // Act
         final String templateName = controller.getSecrets(model);
@@ -114,15 +109,13 @@ class HomeControllerTest {
     @Test
     void handlesSaveClipError() {
         // Arrange
-        final String id = "added-clip-id";
         final String contents = "Test-contents";
         final String templateName = "index";
         final Clip addedClip = new Clip().setContents(contents);
-        final TestPublisher<Clip> publisher = TestPublisher.create();
-        publisher.error(new IllegalArgumentException("TEST: An error occurred when saving clip"));
 
         when(clipRepository.getClips()).thenReturn(Flux.empty());
-        when(clipRepository.addClip(any())).thenReturn(publisher.mono());
+
+        // Test Publisher
 
         // Act
         StepVerifier.create(controller.saveClip(addedClip, model))
@@ -130,7 +123,6 @@ class HomeControllerTest {
                 .verifyComplete();
 
         // Assert
-        verify(model).addAttribute(eq(SAVE_STATUS), argThat(a -> (a instanceof ClipSaveStatus) && !((ClipSaveStatus)a).wasSaved()));
         verify(clipRepository).addClip(argThat(arg -> contents.equals(arg.getContents())));
     }
 }
