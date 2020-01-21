@@ -8,5 +8,6 @@
 
     <modules>
         <module>cloud-clipboard-full</module>
+        <module>cloud-clipboard-untested</module>
     </modules>
   </project>
