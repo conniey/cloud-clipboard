@@ -16,10 +16,22 @@ import reactor.core.publisher.Mono;
 
 @Controller
 public class HomeController {
-    private static final String CLIPS_SET = "clips";
-    private static final String CLIP_SAVE = "clipSave";
-    private static final String SAVE_STATUS = "saveStatus";
-    private static final String SECRETS_LIST = "secrets";
+    /**
+     * Key to the list of clips available.
+     */
+    static final String CLIPS_SET = "clips";
+    /**
+     * Key to the clip to save.
+     */
+    static final String CLIP_SAVE = "clipSave";
+    /**
+     * Key to the save status when a clip is saved.
+     */
+    static final String SAVE_STATUS = "saveStatus";
+    /**
+     * Key to the secrets item.
+     */
+    static final String SECRETS_LIST = "secrets";
 
     private final ClipRepository repository;
     private final SecretRepository secretRepository;
