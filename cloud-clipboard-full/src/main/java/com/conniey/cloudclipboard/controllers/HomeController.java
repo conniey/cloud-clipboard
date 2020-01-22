@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.thymeleaf.spring5.context.webflux.IReactiveDataDriverContextVariable;
 import org.thymeleaf.spring5.context.webflux.ReactiveDataDriverContextVariable;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Controller
@@ -79,9 +78,5 @@ public class HomeController {
                     model.addAttribute(CLIP_SAVE, new Clip());
                     return "index";
                 });
-    }
-
-    Flux<Clip> getClips() {
-        return repository.getClips();
     }
 }

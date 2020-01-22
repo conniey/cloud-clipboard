@@ -5,8 +5,10 @@ import com.conniey.cloudclipboard.models.ClipSaveStatus;
 import com.conniey.cloudclipboard.models.Secret;
 import com.conniey.cloudclipboard.repository.ClipRepository;
 import com.conniey.cloudclipboard.repository.SecretRepository;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -21,11 +23,13 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import reactor.test.publisher.TestPublisher;
 
-import static com.conniey.cloudclipboard.controllers.HomeController.SAVE_STATUS;
+import java.time.Duration;
+
 import static com.conniey.cloudclipboard.controllers.HomeController.SECRETS_LIST;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -38,6 +42,16 @@ class HomeControllerTest {
     private ClipRepository clipRepository;
 
     private HomeController controller;
+
+    @BeforeAll
+    static void beforeAll() {
+        StepVerifier.setDefaultTimeout(Duration.ofSeconds(10));
+    }
+
+    @AfterAll
+    static void afterAll() {
+        StepVerifier.resetDefaultTimeout();
+    }
 
     @BeforeEach
     void setup() {
@@ -80,6 +94,27 @@ class HomeControllerTest {
     }
 
     /**
+     * Verifies that our model has a {@link ClipSaveStatus#wasSaved()} equals to false when the clip cannot be saved.
+     */
+    @Test
+    void handlesSaveClipError() {
+        // Arrange
+        final String contents = "Test-contents";
+        final String templateName = "index";
+        final Clip addedClip = new Clip().setContents(contents);
+
+        when(clipRepository.getClips()).thenReturn(Flux.empty());
+
+        // Act
+        StepVerifier.create(controller.saveClip(addedClip, model))
+                .expectNext(templateName)
+                .verifyComplete();
+
+        // Assert
+        verify(clipRepository).addClip(argThat(arg -> contents.equals(arg.getContents())));
+    }
+
+    /**
      * Verifies that we can add clip.
      */
     @Test
@@ -92,7 +127,7 @@ class HomeControllerTest {
 
         when(clipRepository.getClips()).thenReturn(Flux.empty());
         when(clipRepository.addClip(any())).thenAnswer(invocation -> {
-            Clip clip = invocation.getArgument(0);
+            final Clip clip = invocation.getArgument(0);
             clip.setId(id);
             return Mono.just(clip);
         });
@@ -107,22 +142,26 @@ class HomeControllerTest {
     }
 
     @Test
-    void handlesSaveClipError() {
+    void publisher() {
         // Arrange
-        final String contents = "Test-contents";
-        final String templateName = "index";
-        final Clip addedClip = new Clip().setContents(contents);
+        final Secret secret1 = mock(Secret.class);
+        final Secret secret2 = mock(Secret.class);
 
-        when(clipRepository.getClips()).thenReturn(Flux.empty());
+        final TestPublisher<Secret> testPublisher = TestPublisher.create();
 
-        // Test Publisher
-
-        // Act
-        StepVerifier.create(controller.saveClip(addedClip, model))
-                .expectNext(templateName)
-                .verifyComplete();
-
-        // Assert
-        verify(clipRepository).addClip(argThat(arg -> contents.equals(arg.getContents())));
+        // Act & Assert
+        StepVerifier.create(testPublisher.flux())
+                .then(() -> {
+                    testPublisher.next(secret1);
+                    testPublisher.next(secret2);
+                })
+                .expectNext(secret1, secret2)
+                .then(() -> {
+                    testPublisher.error(new IllegalArgumentException("An error occurred."));
+                })
+                .expectErrorSatisfies(error -> {
+                    Assertions.assertTrue(error instanceof IllegalArgumentException);
+                })
+                .verify();
     }
 }
