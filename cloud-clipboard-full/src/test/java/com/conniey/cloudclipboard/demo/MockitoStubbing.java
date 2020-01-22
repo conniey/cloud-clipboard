@@ -1,5 +1,6 @@
 package com.conniey.cloudclipboard.demo;
 
+import com.conniey.cloudclipboard.demo.data.DbUser;
 import com.conniey.cloudclipboard.demo.data.Repository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,46 +17,63 @@ import static org.mockito.Mockito.when;
 
 class MockitoStubbing {
     @Mock
-    private Repository<User> repository;
+    private Repository<DbUser> repository;
+    private UsersCollection collection;
 
     @BeforeEach
     void setup() {
         MockitoAnnotations.initMocks(this);
+
+        collection = new UsersCollection(repository);
     }
 
+    /**
+     * Verify that we can get a user by id from our repository.
+     */
     @Test
     void canGetUser() {
         // Arrange
         final String id = "my-id";
-        final User user = new User().setId("some-id").setName("Some name");
-        final UsersCollection collection = new UsersCollection(repository);
+        final DbUser databaseUser = new DbUser(id, "Joe", "Smith");
+        final String expectedName = databaseUser.getLastName() + ", " + databaseUser.getFirstName();
 
+        when(repository.get(id)).thenReturn(databaseUser);
 
         // Act
         final User actual = collection.getById(id);
 
         // Assert
         Assertions.assertNotNull(collection);
+
+        Assertions.assertEquals(databaseUser.getId(), actual.getId());
+        Assertions.assertEquals(expectedName, actual.getName());
+    }
+
+    @Test
+    void canHandleNonExistentUser() {
+        // Arrange
+        final String nonExistentUserId = "non-existent-id";
+
+        // Act & Assert
+        Assertions.assertThrows(IllegalArgumentException.class, () -> collection.getById(nonExistentUserId));
     }
 
     @Test
     void canGetMultipleUsers() {
         // Arrange
-        final String id = "first-id";
+        final String id1 = "first-id";
         final String id2 = "second-id";
         final String id3 = "test-id";
-        final User user = new User().setId(id).setName("Betty");
-        final User user2 = new User().setId(id2).setName("Fred");
-        final User user3 = new User().setId(id3).setName("Joe");
-
-        final UsersCollection collection = new UsersCollection(repository);
+        final DbUser user = new DbUser(id1, "Betty", "White");
+        final DbUser user2 = new DbUser(id2, "Fred", "Smith");
+        final DbUser user3 = new DbUser(id3, "Joe", "Black");
 
         when(repository.get(anyList())).then(invocation -> {
             List<String> userIds = invocation.getArgument(0);
-            List<User> matchingUsers = new ArrayList<>();
+            List<DbUser> matchingUsers = new ArrayList<>();
             userIds.forEach(e -> {
                 switch (e) {
-                    case id:
+                    case id1:
                         matchingUsers.add(user);
                         break;
                     case id2:
@@ -71,29 +89,9 @@ class MockitoStubbing {
         });
 
         // Act
-        List<User> actual = collection.getUsersById(id, id2, id3);
+        final List<User> actual = collection.getUsersById(id1, id2, id3);
 
         // Assert
         Assertions.assertEquals(3, actual.size());
-    }
-
-    @Test
-    void testAbstractClasses() {
-        // Arrange
-        final AnAbstractClass mock = mock(AnAbstractClass.class);
-
-        // Act
-        final String actual = mock.someComplexAbstractLogic();
-
-        // Assert
-        Assertions.assertNotNull(actual);
-    }
-
-    abstract class AnAbstractClass {
-        String someComplexAbstractLogic() {
-            return "phew";
-        }
-
-        abstract Integer getValue();
     }
 }

@@ -6,6 +6,7 @@ import com.conniey.cloudclipboard.demo.data.Repository;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class UsersCollection {
@@ -26,7 +27,7 @@ public class UsersCollection {
     }
 
     public List<User> getUsersById(String... ids) {
-        List<String> list = new ArrayList<>();
+        final List<String> list = new ArrayList<>();
         Collections.addAll(list, ids);
 
         // OOPS! A bug is here.
@@ -39,9 +40,7 @@ public class UsersCollection {
     }
 
     private static User getUser(DbUser user) {
-        if (user == null) {
-            throw new IllegalArgumentException("Could not find user.");
-        }
+        Objects.requireNonNull(user, "'user' cannot be null.");
 
         final String name = String.join(", ", user.getLastName(), user.getFirstName());
 
