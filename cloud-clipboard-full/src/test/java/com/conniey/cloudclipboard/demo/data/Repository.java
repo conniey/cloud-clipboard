@@ -1,4 +1,4 @@
-package com.conniey.cloudclipboard.demo;
+package com.conniey.cloudclipboard.demo.data;
 
 import java.util.List;
 
@@ -21,5 +21,5 @@ public interface Repository<T> {
     /**
      * Gets a collection of items by id.
      */
-    List<T> get(List<String> id);
+    List<T> get(List<String> ids);
 }

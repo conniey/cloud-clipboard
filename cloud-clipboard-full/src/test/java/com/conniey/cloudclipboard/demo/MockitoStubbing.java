@@ -1,5 +1,6 @@
 package com.conniey.cloudclipboard.demo;
 
+import com.conniey.cloudclipboard.demo.data.Repository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
