@@ -1,4 +1,4 @@
-package com.conniey.cloudclipboard;
+package com.conniey.cloudclipboard.demo;
 
 import java.util.List;
 

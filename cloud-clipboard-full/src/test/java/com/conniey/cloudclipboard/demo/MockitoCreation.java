@@ -1,8 +1,7 @@
-package com.conniey.cloudclipboard;
+package com.conniey.cloudclipboard.demo;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 
 import static org.mockito.Mockito.mock;
 

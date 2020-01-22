@@ -1,4 +1,4 @@
-package com.conniey.cloudclipboard;
+package com.conniey.cloudclipboard.demo;
 
 public class User {
     private String id;
