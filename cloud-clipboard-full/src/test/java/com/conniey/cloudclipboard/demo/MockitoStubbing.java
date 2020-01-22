@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
@@ -37,8 +38,6 @@ class MockitoStubbing {
         final String id = "my-id";
         final DbUser databaseUser = new DbUser(id, "Joe", "Smith");
         final String expectedName = databaseUser.getLastName() + ", " + databaseUser.getFirstName();
-
-        when(repository.get(id)).thenReturn(databaseUser);
 
         // Act
         final User actual = collection.getById(id);
@@ -93,6 +92,8 @@ class MockitoStubbing {
         final List<User> actual = collection.getUsersById(id1, id2, id3);
 
         // Assert
+        Mockito.verify(repository).get(Mockito.<List<String>>argThat(e -> e.size() == 3));
+
         Assertions.assertEquals(3, actual.size());
     }
 }

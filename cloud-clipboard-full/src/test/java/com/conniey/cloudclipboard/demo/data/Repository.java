@@ -16,11 +16,6 @@ public interface Repository<T> {
     T get(String id);
 
     /**
-     * Gets the fully populated item.
-     */
-    T get(T item);
-
-    /**
      * Gets a collection of items by id.
      */
     List<T> get(List<String> ids);

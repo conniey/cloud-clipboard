@@ -16,10 +16,6 @@ public class UsersCollection {
         this.userRepository = userRepository;
     }
 
-    public int numberOfUsers() {
-        return userRepository.get().size();
-    }
-
     public User getById(String id) {
         final DbUser dbUser = userRepository.get(id);
 
