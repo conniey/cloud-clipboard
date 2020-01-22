@@ -2,6 +2,8 @@ package com.conniey.cloudclipboard.demo;
 
 import com.conniey.cloudclipboard.demo.data.DbUser;
 import com.conniey.cloudclipboard.demo.data.Repository;
+import com.conniey.cloudclipboard.demo.view.User;
+import com.conniey.cloudclipboard.demo.view.UsersCollection;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,7 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 class MockitoStubbing {

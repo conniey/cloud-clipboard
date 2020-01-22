@@ -1,4 +1,4 @@
-package com.conniey.cloudclipboard.demo;
+package com.conniey.cloudclipboard.demo.view;
 
 import com.conniey.cloudclipboard.demo.data.DbUser;
 import com.conniey.cloudclipboard.demo.data.Repository;

@@ -19,9 +19,7 @@ import org.thymeleaf.spring5.context.webflux.IReactiveDataDriverContextVariable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
-import reactor.test.publisher.TestPublisher;
 
-import static com.conniey.cloudclipboard.controllers.HomeController.SAVE_STATUS;
 import static com.conniey.cloudclipboard.controllers.HomeController.SECRETS_LIST;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -92,7 +90,7 @@ class HomeControllerTest {
 
         when(clipRepository.getClips()).thenReturn(Flux.empty());
         when(clipRepository.addClip(any())).thenAnswer(invocation -> {
-            Clip clip = invocation.getArgument(0);
+            final Clip clip = invocation.getArgument(0);
             clip.setId(id);
             return Mono.just(clip);
         });
@@ -106,6 +104,9 @@ class HomeControllerTest {
         verify(clipRepository).addClip(argThat(arg -> contents.equals(arg.getContents())));
     }
 
+    /**
+     * Verifies that our model has a {@link ClipSaveStatus#wasSaved()} equals to false when the clip cannot be saved.
+     */
     @Test
     void handlesSaveClipError() {
         // Arrange
@@ -114,8 +115,6 @@ class HomeControllerTest {
         final Clip addedClip = new Clip().setContents(contents);
 
         when(clipRepository.getClips()).thenReturn(Flux.empty());
-
-        // Test Publisher
 
         // Act
         StepVerifier.create(controller.saveClip(addedClip, model))
