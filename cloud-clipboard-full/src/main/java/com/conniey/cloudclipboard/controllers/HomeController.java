@@ -12,14 +12,27 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.thymeleaf.spring5.context.webflux.IReactiveDataDriverContextVariable;
 import org.thymeleaf.spring5.context.webflux.ReactiveDataDriverContextVariable;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Controller
 public class HomeController {
-    private static final String CLIPS_SET = "clips";
-    private static final String CLIP_SAVE = "clipSave";
-    private static final String SAVE_STATUS = "saveStatus";
-    private static final String SECRETS_LIST = "secrets";
+    /**
+     * Key to the list of clips available.
+     */
+    static final String CLIPS_SET = "clips";
+    /**
+     * Key to the clip to save.
+     */
+    static final String CLIP_SAVE = "clipSave";
+    /**
+     * Key to the save status when a clip is saved.
+     */
+    static final String SAVE_STATUS = "saveStatus";
+    /**
+     * Key to the secrets item.
+     */
+    static final String SECRETS_LIST = "secrets";
 
     private final ClipRepository repository;
     private final SecretRepository secretRepository;
@@ -54,22 +67,21 @@ public class HomeController {
 
     @PostMapping("/clips")
     public Mono<String> saveClip(@ModelAttribute Clip clip, Model model) {
-        return repository.addClip(clip).map(added -> {
-            model.addAttribute(SAVE_STATUS, new ClipSaveStatus(true));
-            return added;
-        }).onErrorContinue((error, ob) -> {
-            model.addAttribute(SAVE_STATUS, new ClipSaveStatus(false));
-        }).then(Mono.fromCallable(() -> {
-            IReactiveDataDriverContextVariable reactorModel =
-                    new ReactiveDataDriverContextVariable(repository.getClips(), 1);
+        return repository.addClip(clip)
+                .map(e -> new ClipSaveStatus(true))
+                .onErrorResume(error -> Mono.just(new ClipSaveStatus(false)))
+                .map(status -> {
+                    IReactiveDataDriverContextVariable reactorModel =
+                            new ReactiveDataDriverContextVariable(repository.getClips(), 1);
 
-            if (!model.containsAttribute(SAVE_STATUS)) {
-                model.addAttribute(SAVE_STATUS, new ClipSaveStatus(true));
-            }
+                    model.addAttribute(SAVE_STATUS, status);
+                    model.addAttribute(CLIPS_SET, reactorModel);
+                    model.addAttribute(CLIP_SAVE, new Clip());
+                    return "index";
+                });
+    }
 
-            model.addAttribute(CLIPS_SET, reactorModel);
-            model.addAttribute(CLIP_SAVE, new Clip());
-            return "index";
-        }));
+    Flux<Clip> getClips() {
+        return repository.getClips();
     }
 }
