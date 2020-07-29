@@ -18,6 +18,7 @@ import reactor.test.StepVerifier;
 import java.time.Duration;
 
 import static com.conniey.cloudclipboard.controllers.HomeController.SAVE_STATUS;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -49,6 +50,30 @@ class HomeControllerTest {
         controller = new HomeController(clipRepository, secretRepository);
     }
 
+    @Test
+    void canSaveClip() {
+        // Arrange
+        final String id = "added-clip-id";
+        final String contents = "Test-contents";
+        final String templateName = "index";
+        final Clip addedClip = new Clip().setContents(contents);
+
+        when(clipRepository.getClips()).thenReturn(Flux.empty());
+        when(clipRepository.addClip(any())).thenAnswer(invocation -> {
+            final Clip clip = invocation.getArgument(0);
+            clip.setId(id);
+            return Mono.just(clip);
+        });
+
+        // Act
+        StepVerifier.create(controller.saveClip(addedClip, model))
+                .expectNext(templateName)
+                .verifyComplete();
+
+        // Assert
+        verify(clipRepository).addClip(argThat(arg -> contents.equals(arg.getContents())));
+    }
+
     /**
      * Verifies that our model has a {@link ClipSaveStatus#wasSaved()} equals to false when the clip cannot be saved.
      */
@@ -60,7 +85,6 @@ class HomeControllerTest {
         final Clip addedClip = new Clip().setContents(contents);
 
         when(clipRepository.getClips()).thenReturn(Flux.empty());
-        when(clipRepository.addClip(addedClip)).thenReturn(Mono.error(new UnsupportedOperationException("test-error")));
 
         // Act
         StepVerifier.create(controller.saveClip(addedClip, model))
@@ -68,18 +92,6 @@ class HomeControllerTest {
                 .verifyComplete();
 
         // Assert
-        verify(clipRepository).addClip(argThat(arg -> contents.equals(arg.getContents())));
-        verify(model).addAttribute(eq(SAVE_STATUS), argThat(obj -> {
-            return obj instanceof ClipSaveStatus && !((ClipSaveStatus) obj).wasSaved();
-        }));
-    }
 
-    @Test
-    void canSaveClip() {
-        // Arrange
-        final String id = "added-clip-id";
-        final String contents = "Test-contents";
-        final String templateName = "index";
-        final Clip addedClip = new Clip().setContents(contents);
     }
 }
