@@ -40,19 +40,19 @@ public class HomeController {
     /**
      * Key to the list of clips available.
      */
-    private static final String CLIPS_SET = "clips";
+    static final String CLIPS_SET = "clips";
     /**
      * Key to the clip to save.
      */
-    private static final String CLIP_SAVE = "clipSave";
+    static final String CLIP_SAVE = "clipSave";
     /**
      * Key to the save status when a clip is saved.
      */
-    private static final String SAVE_STATUS = "saveStatus";
+    static final String SAVE_STATUS = "saveStatus";
     /**
      * Key to the secrets item.
      */
-    private static final String SECRETS_LIST = "secrets";
+    static final String SECRETS_LIST = "secrets";
 
     private final ObjectMapper objectMapper;
     private final BlobContainerAsyncClient containerClient;
