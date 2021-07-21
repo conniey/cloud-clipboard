@@ -44,18 +44,11 @@ public class AzureStorageRepository implements ClipRepository {
     public Flux<Clip> getClips() {
         return containerClient.listBlobs().flatMap(blob -> containerClient
                 .getBlobAsyncClient(blob.getName())
-                .download()
-                .reduce((first, second) -> {
-                    first.rewind();
-                    second.rewind();
-                    final ByteBuffer allocated = ByteBuffer.allocate(first.limit() + second.limit())
-                            .put(first).put(second);
-                    allocated.flip();
-                    return allocated;
-                })
-                .map(buffer -> {
+                .downloadContent()
+                .map(binaryData -> {
                     try {
-                        return objectMapper.readValue(new ByteBufferBackedInputStream(buffer), Clip.class);
+                        return objectMapper.readValue(
+                                new ByteBufferBackedInputStream(binaryData.toByteBuffer()), Clip.class);
                     } catch (IOException e) {
                         throw Exceptions.propagate(e);
                     }
