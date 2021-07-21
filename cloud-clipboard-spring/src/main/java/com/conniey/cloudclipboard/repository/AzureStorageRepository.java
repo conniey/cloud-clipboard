@@ -1,10 +1,12 @@
 package com.conniey.cloudclipboard.repository;
 
+import com.azure.core.credential.TokenCredential;
+import com.azure.identity.ClientSecretCredentialBuilder;
 import com.azure.storage.blob.BlobContainerAsyncClient;
 import com.azure.storage.blob.BlobServiceClientBuilder;
 import com.azure.storage.blob.ProgressReceiver;
 import com.azure.storage.blob.models.ParallelTransferOptions;
-import com.conniey.cloudclipboard.models.AuthenticationProvider;
+import com.conniey.cloudclipboard.models.AzureConfiguration;
 import com.conniey.cloudclipboard.models.Clip;
 import com.conniey.cloudclipboard.models.StorageConfiguration;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -30,11 +32,18 @@ public class AzureStorageRepository implements ClipRepository {
     private final BlobContainerAsyncClient containerClient;
 
     @Autowired
-    public AzureStorageRepository(AuthenticationProvider authenticationProvider, StorageConfiguration configuration,
+    public AzureStorageRepository(AzureConfiguration azureConfiguration, StorageConfiguration configuration,
             ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
-        this.containerClient = new BlobServiceClientBuilder()
-                .credential(authenticationProvider.getTokenCredential())
+
+        final TokenCredential clientSecretCredential = new ClientSecretCredentialBuilder()
+                .clientId(azureConfiguration.getClientId())
+                .clientSecret(azureConfiguration.getClientSecret())
+                .tenantId(azureConfiguration.getTenantId())
+                .build();
+
+        containerClient = new BlobServiceClientBuilder()
+                .credential(clientSecretCredential)
                 .endpoint(configuration.getEndpoint())
                 .buildAsyncClient()
                 .getBlobContainerAsyncClient(configuration.getContainerName());

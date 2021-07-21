@@ -2,7 +2,6 @@ package com.conniey.cloudclipboard.models;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.ConstructorBinding;
-import org.springframework.stereotype.Component;
 
 /**
  * Configuration for accessing Azure Blob Storage.

@@ -3,9 +3,10 @@ package com.conniey.cloudclipboard.repository;
 import com.conniey.cloudclipboard.models.AzureConfiguration;
 import com.conniey.cloudclipboard.models.KeyVaultConfiguration;
 import com.conniey.cloudclipboard.models.Secret;
+import com.microsoft.aad.msal4j.ClientCredentialFactory;
 import com.microsoft.aad.msal4j.ClientCredentialParameters;
-import com.microsoft.aad.msal4j.ClientSecret;
 import com.microsoft.aad.msal4j.ConfidentialClientApplication;
+import com.microsoft.aad.msal4j.IClientSecret;
 import com.microsoft.azure.Page;
 import com.microsoft.azure.PagedList;
 import com.microsoft.azure.keyvault.KeyVaultClient;
@@ -36,7 +37,7 @@ public class OldKeyVaultRepository implements SecretRepository {
     public OldKeyVaultRepository(AzureConfiguration azureConfiguration, KeyVaultConfiguration configuration) {
         this.keyVaultUrl = configuration.getEndpoint();
 
-        final ClientSecret clientSecret = new ClientSecret(azureConfiguration.getClientSecret());
+        final IClientSecret clientSecret = ClientCredentialFactory.createFromSecret(azureConfiguration.getClientSecret());
         final String authority = "https://login.microsoftonline.com/" + azureConfiguration.getTenantId();
         this.keyVaultClient = new KeyVaultClient(new KeyVaultCredentials() {
             @Override

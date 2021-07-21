@@ -1,8 +1,10 @@
 package com.conniey.cloudclipboard.repository;
 
+import com.azure.core.credential.TokenCredential;
+import com.azure.identity.ClientSecretCredentialBuilder;
 import com.azure.security.keyvault.secrets.SecretAsyncClient;
 import com.azure.security.keyvault.secrets.SecretClientBuilder;
-import com.conniey.cloudclipboard.models.AuthenticationProvider;
+import com.conniey.cloudclipboard.models.AzureConfiguration;
 import com.conniey.cloudclipboard.models.KeyVaultConfiguration;
 import com.conniey.cloudclipboard.models.Secret;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,9 +19,15 @@ public class KeyVaultRepository implements SecretRepository {
     private final SecretAsyncClient secretClient;
 
     @Autowired
-    public KeyVaultRepository(AuthenticationProvider authenticationProvider, KeyVaultConfiguration configuration) {
-        this.secretClient = new SecretClientBuilder()
-                .credential(authenticationProvider.getTokenCredential())
+    public KeyVaultRepository(AzureConfiguration azureConfiguration, KeyVaultConfiguration configuration) {
+        final TokenCredential clientSecretCredential = new ClientSecretCredentialBuilder()
+                .clientId(azureConfiguration.getClientId())
+                .clientSecret(azureConfiguration.getClientSecret())
+                .tenantId(azureConfiguration.getTenantId())
+                .build();
+
+        secretClient = new SecretClientBuilder()
+                .credential(clientSecretCredential)
                 .vaultUrl(configuration.getEndpoint())
                 .buildAsyncClient();
     }
