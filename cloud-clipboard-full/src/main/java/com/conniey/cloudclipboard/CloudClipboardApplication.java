@@ -1,6 +1,5 @@
 package com.conniey.cloudclipboard;
 
-import com.conniey.cloudclipboard.models.AzureConfiguration;
 import com.conniey.cloudclipboard.models.KeyVaultConfiguration;
 import com.conniey.cloudclipboard.models.StorageConfiguration;
 import org.springframework.boot.SpringApplication;
