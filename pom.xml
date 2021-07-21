@@ -9,6 +9,6 @@
   <modules>
     <module>cloud-clipboard-full</module>
     <module>cloud-clipboard-untested</module>
-    <module>cloud-clipboard-spring</module>p
+    <module>cloud-clipboard-spring</module>
   </modules>
 </project>
