@@ -1,11 +1,15 @@
 package com.conniey.cloudclipboard.models;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
-@ConfigurationProperties("aad")
+@Component
 public class AzureConfiguration {
+    @Value("${AZURE_CLIENT_ID}")
     private String clientId;
+    @Value("${AZURE_CLIENT_SECRET}")
     private String clientSecret;
+    @Value("${AZURE_TENANT_ID}")
     private String tenantId;
 
     public String getTenantId() {
