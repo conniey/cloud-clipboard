@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class AuthenticationProvider {
 
-    private final DefaultAzureCredential credential;
+    private final TokenCredential credential;
 
     /**
      * Gets the credential to authenticate with the service based using {@link DefaultAzureCredential}.
