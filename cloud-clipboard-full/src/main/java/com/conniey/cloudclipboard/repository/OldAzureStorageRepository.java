@@ -27,7 +27,7 @@ import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Repository
-@Profile("oldsdk")
+@Profile("legacysdk")
 public class OldAzureStorageRepository implements ClipRepository {
     private final CloudBlobContainer containerClient;
     private final ObjectMapper objectMapper;
